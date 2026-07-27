@@ -8,24 +8,47 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
 
-# -----------------------------
-# File Paths
-# -----------------------------
+# -----------------------------------
+# Secret File Paths
+# -----------------------------------
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-TOKEN_PATH = os.path.join(BASE_DIR, "token_calendar.json")
-CREDENTIALS_PATH = os.path.join(BASE_DIR, "credentials.json")
+# Local development
+LOCAL_CREDENTIALS = os.path.join(BASE_DIR, "credentials.json")
+LOCAL_TOKEN = os.path.join(BASE_DIR, "token_calendar.json")
+
+# Render Secret Files
+RENDER_CREDENTIALS = "/etc/secrets/credentials.json"
+RENDER_TOKEN = "/etc/secrets/token_calendar.json"
+
+# Automatically use Render files if they exist
+CREDENTIALS_PATH = (
+    RENDER_CREDENTIALS
+    if os.path.exists(RENDER_CREDENTIALS)
+    else LOCAL_CREDENTIALS
+)
+
+TOKEN_PATH = (
+    RENDER_TOKEN
+    if os.path.exists(RENDER_TOKEN)
+    else LOCAL_TOKEN
+)
 
 
-# -----------------------------
+# -----------------------------------
 # Google Calendar Scope
-# -----------------------------
-SCOPES = ["https://www.googleapis.com/auth/calendar"]
+# -----------------------------------
+
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar"
+]
 
 
-# -----------------------------
-# Authenticate
-# -----------------------------
+# -----------------------------------
+# Calendar Service
+# -----------------------------------
+
 def get_calendar_service():
     creds = None
 
@@ -36,22 +59,28 @@ def get_calendar_service():
         )
 
     if not creds or not creds.valid:
+
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
+
         else:
+
             if not os.path.exists(CREDENTIALS_PATH):
                 raise FileNotFoundError(
-                    f"Missing Google credentials file: {CREDENTIALS_PATH}"
+                    f"Google credentials not found: {CREDENTIALS_PATH}"
                 )
 
             flow = InstalledAppFlow.from_client_secrets_file(
                 CREDENTIALS_PATH,
                 SCOPES
             )
+
             creds = flow.run_local_server(port=0)
 
-        with open(TOKEN_PATH, "w") as token:
-            token.write(creds.to_json())
+            # Save token only for local development
+            if TOKEN_PATH == LOCAL_TOKEN:
+                with open(TOKEN_PATH, "w") as token:
+                    token.write(creds.to_json())
 
     return build(
         "calendar",
@@ -59,9 +88,11 @@ def get_calendar_service():
         credentials=creds
     )
 
-# -----------------------------
+
+# -----------------------------------
 # Create Meeting
-# -----------------------------
+# -----------------------------------
+
 def create_meeting(
     title,
     agenda,
@@ -69,25 +100,15 @@ def create_meeting(
     duration_minutes=30,
     attendees=None,
 ):
-    """
-    Creates a Google Calendar event with a Google Meet link.
 
-    Args:
-        title (str): Meeting title
-        agenda (str): Meeting agenda/description
-        start_datetime (datetime): Meeting start datetime
-        duration_minutes (int): Meeting duration
-        attendees (list[str]): List of attendee email addresses
-
-    Returns:
-        dict
-    """
     service = get_calendar_service()
-    
+
     if attendees is None:
         attendees = []
 
-    end_datetime = start_datetime + timedelta(minutes=duration_minutes)
+    end_datetime = start_datetime + timedelta(
+        minutes=duration_minutes
+    )
 
     event = {
         "summary": title,
@@ -123,8 +144,15 @@ def create_meeting(
 
     meet_link = None
 
-    conference_data = created_event.get("conferenceData", {})
-    entry_points = conference_data.get("entryPoints", [])
+    conference_data = created_event.get(
+        "conferenceData",
+        {}
+    )
+
+    entry_points = conference_data.get(
+        "entryPoints",
+        []
+    )
 
     for entry in entry_points:
         if entry.get("entryPointType") == "video":
@@ -139,14 +167,17 @@ def create_meeting(
         "end": created_event["end"]["dateTime"],
         "attendees": [
             attendee["email"]
-            for attendee in created_event.get("attendees", [])
+            for attendee in created_event.get(
+                "attendees",
+                []
+            )
         ],
     }
 
 
-
-from datetime import timedelta
-
+# -----------------------------------
+# Update Meeting
+# -----------------------------------
 
 def update_google_meeting(
     google_event_id,
@@ -154,36 +185,23 @@ def update_google_meeting(
     agenda,
     start_datetime,
     duration_minutes=30,
-    attendees=None
+    attendees=None,
 ):
-    """
-    Updates an existing Google Calendar event.
-
-    Parameters:
-        google_event_id (str)
-        title (str)
-        agenda (str)
-        start_datetime (datetime)
-        duration_minutes (int)
-        attendees (list[str])
-
-    Returns:
-        dict
-    """
 
     service = get_calendar_service()
+
     if attendees is None:
         attendees = []
 
-    end_datetime = start_datetime + timedelta(minutes=duration_minutes)
+    end_datetime = start_datetime + timedelta(
+        minutes=duration_minutes
+    )
 
-    # Get the existing event
     event = service.events().get(
         calendarId="primary",
         eventId=google_event_id
     ).execute()
 
-    # Update fields
     event["summary"] = title
     event["description"] = agenda
 
@@ -202,20 +220,23 @@ def update_google_meeting(
         for email in attendees
     ]
 
-    # Update the event
     updated_event = service.events().update(
         calendarId="primary",
         eventId=google_event_id,
         body=event,
-        sendUpdates="all"      # Google emails attendees automatically
+        sendUpdates="all"
     ).execute()
 
-    # Extract Meet link if it exists
     meet_link = ""
 
     conference_data = updated_event.get("conferenceData")
+
     if conference_data:
-        entry_points = conference_data.get("entryPoints", [])
+        entry_points = conference_data.get(
+            "entryPoints",
+            []
+        )
+
         if entry_points:
             meet_link = entry_points[0]["uri"]
 
@@ -227,6 +248,9 @@ def update_google_meeting(
         "end": updated_event["end"]["dateTime"],
         "attendees": [
             attendee["email"]
-            for attendee in updated_event.get("attendees", [])
+            for attendee in updated_event.get(
+                "attendees",
+                []
+            )
         ]
     }
