@@ -1,0 +1,124 @@
+/* ==========================================
+   AI COPILOT PAGE
+========================================== */
+
+/* Page Heading */
+
+.ai-heading{
+
+    text-align:center;
+
+    margin-bottom:40px;
+
+}
+
+/* Prompt Card */
+
+textarea.form-control{
+
+    resize:none;
+
+    min-height:180px;
+
+}
+
+/* Generate Button */
+
+.text-end .btn{
+
+    min-width:140px;
+
+}
+
+/* Suggested Prompt Buttons */
+
+.suggested-btn{
+
+    background:#B1D3B9;
+
+    color:#17433F;
+
+    border:none;
+
+    border-radius:25px;
+
+    padding:8px 18px;
+
+    margin:5px;
+
+    transition:.3s;
+
+}
+
+.suggested-btn:hover{
+
+    background:#476f57;
+
+    color:white;
+
+}
+
+/* Target Audience Card */
+
+.accordion-button{
+
+    font-weight:600;
+
+}
+
+.accordion-button:not(.collapsed){
+
+    background:#eaf3ff;
+
+    color:#0d6efd;
+
+}
+
+/* Recipient Card */
+
+.card h3{
+
+    font-weight:700;
+
+}
+
+/* Email Preview */
+
+.card-body p{
+
+    line-height:1.7;
+
+}
+
+/* Action Buttons */
+
+.text-center .btn{
+
+    min-width:140px;
+
+}
+
+/* Cards */
+
+#advancedFilters .card,
+#advancedFilters .accordion{
+
+    margin-bottom:20px;
+
+}
+
+/* Audience Cards */
+
+.audience-card{
+
+    background:#B1D3B9;
+
+    border:none;
+
+    border-radius:14px;
+
+}
+
+#emailPreview {
+    white-space: pre-wrap;
+}

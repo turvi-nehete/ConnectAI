@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Audit Logs
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- Heading -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold">Audit Logs</h2>
+            <p class="text-muted">
+                Monitor all AI actions and system activities.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4 audit-summary">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center p-3">
+                <h6 class="text-muted">Total Logs</h6>
+                <h3 class="text-primary">{{ total_logs }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center p-3">
+                <h6 class="text-muted">Successful</h6>
+                <h3 class="text-success">{{ successful }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center p-3">
+                <h6 class="text-muted">Failed</h6>
+                <h3 class="text-danger">{{ failed }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center p-3">
+                <h6 class="text-muted">Today's Activity</h6>
+                <h3 class="text-warning">{{ today }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+    
+<!-- Search + Filter -->
+
+<div class="card shadow-sm border-0 mb-4">
+
+    <div class="card-body">
+
+        <form method="GET">
+
+            <div class="row">
+
+                <div class="col-md-8">
+
+                    <input
+                        type="text"
+                        name="search"
+                        class="form-control"
+                        placeholder="Search Prompt, User or Tool..."
+                        value="{{ search }}">
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <select
+                        name="tool"
+                        class="form-select"
+                        onchange="this.form.submit()">
+
+                        <option value="All"
+                            {% if selected_tool == "All" %}selected{% endif %}>
+                            All Tools
+                        </option>
+
+                        <option value="LLM"
+                            {% if selected_tool == "LLM" %}selected{% endif %}>
+                            LLM
+                        </option>
+
+                        <option value="SQL Tool"
+                            {% if selected_tool == "SQL Tool" %}selected{% endif %}>
+                            SQL Tool
+                        </option>
+
+                        <option value="Gmail API"
+                            {% if selected_tool == "Gmail API" %}selected{% endif %}>
+                            Gmail API
+                        </option>
+
+                        <option value="Google Calendar"
+                            {% if selected_tool == "Google Calendar" %}selected{% endif %}>
+                            Google Calendar
+                        </option>
+
+                        <option value="Tavily Search"
+                            {% if selected_tool == "Tavily Search" %}selected{% endif %}>
+                            Tavily Search
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+    <!-- Audit Table -->
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Prompt</th>
+                        <th>Tool Used</th>
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+{% for log in page_obj %}
+
+<tr>
+
+<td>{{ log.timestamp|date:"d M Y H:i" }}</td>
+
+<td>{{ log.uid.username }}</td>
+
+<td>{{ log.prompt|truncatechars:60 }}</td>
+
+<td>
+
+{% if log.tool_used == "LLM" %}
+<span class="badge bg-primary">{{ log.tool_used }}</span>
+
+{% elif log.tool_used == "SQL Tool" %}
+<span class="badge bg-info text-dark">{{ log.tool_used }}</span>
+
+{% elif log.tool_used == "Google Calendar" %}
+<span class="badge bg-warning text-dark">{{ log.tool_used }}</span>
+
+{% elif log.tool_used == "Gmail API" %}
+<span class="badge bg-danger">{{ log.tool_used }}</span>
+
+{% else %}
+<span class="badge bg-secondary">{{ log.tool_used }}</span>
+{% endif %}
+
+</td>
+
+<td>
+
+{% if log.success %}
+<span class="badge bg-success">
+Success
+</span>
+{% else %}
+<span class="badge bg-danger">
+Failed
+</span>
+{% endif %}
+
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+
+<td colspan="5" class="text-center text-muted">
+
+No audit logs found.
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- Pagination -->
+
+    <nav class="mt-4">
+
+<ul class="pagination justify-content-center">
+
+{% if page_obj.has_previous %}
+
+<li class="page-item">
+
+<a class="page-link"
+href="?page={{ page_obj.previous_page_number }}">
+
+Previous
+
+</a>
+
+</li>
+
+{% endif %}
+
+{% for num in page_obj.paginator.page_range %}
+
+<li class="page-item {% if page_obj.number == num %}active{% endif %}">
+
+<a class="page-link"
+href="?page={{ num }}">
+
+{{ num }}
+
+</a>
+
+</li>
+
+{% endfor %}
+
+{% if page_obj.has_next %}
+
+<li class="page-item">
+
+<a class="page-link"
+href="?page={{ page_obj.next_page_number }}">
+
+Next
+
+</a>
+
+</li>
+
+{% endif %}
+
+</ul>
+
+</nav>
+
+</div>
+
+{% endblock %}

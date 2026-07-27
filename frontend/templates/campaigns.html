@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Inbox
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- Heading -->
+    <div class="d-flex justify-content-between align-items-center mb-4 page-title">
+
+        <div>
+            <h2 class="fw-bold">Inbox</h2>
+            <p class="text-muted">
+                Track every email you've sent, monitor replies, and review your communication history.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Summary Cards -->
+
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Emails Sent</h6>
+                    <h3 class="fw-bold mb-0">{{ total_sent }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Replies</h6>
+                    <h3 class="fw-bold text-success mb-0">{{ total_replies }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Pending Reply</h6>
+                    <h3 class="fw-bold text-warning mb-0">{{ pending_replies }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Failed</h6>
+                    <h3 class="fw-bold text-danger mb-0">{{ failed }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Search + Filter -->
+
+<div class="card shadow-sm border-0 mb-4 search-box">
+
+    <div class="card-body">
+
+        <form method="GET">
+
+            <div class="row g-3">
+
+                <div class="col-md-8">
+
+                    <input
+                        type="text"
+                        name="search"
+                        class="form-control"
+                        placeholder="Search by subject..."
+                        value="{{ request.GET.search }}">
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <select
+                        name="status"
+                        class="form-select">
+
+                        <option value=""
+                            {% if request.GET.status == "" %}selected{% endif %}>
+                            All Emails
+                        </option>
+
+                        <option value="sent"
+                            {% if request.GET.status == "sent" %}selected{% endif %}>
+                            Sent
+                        </option>
+
+                        <option value="replied"
+                            {% if request.GET.status == "replied" %}selected{% endif %}>
+                            Replied
+                        </option>
+
+                        <option value="pending"
+                            {% if request.GET.status == "pending" %}selected{% endif %}>
+                            Pending Reply
+                        </option>
+
+                        <option value="failed"
+                            {% if request.GET.status == "failed" %}selected{% endif %}>
+                            Failed
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-1">
+
+                    <button class="btn btn-primary w-100">
+
+                        Go
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+    <!-- Inbox Table -->
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Email Subject</th>
+                        <th>Recipients</th>
+                        <th>Replies</th>
+                        <th>Sent On</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+{% for email in emails %}
+
+<tr>
+
+    <td>
+
+        <div class="fw-semibold">
+
+            {{ email.subj }}
+
+        </div>
+
+        <small class="text-muted">
+
+            Sent via AI Chat
+
+        </small>
+
+    </td>
+
+    <td>
+
+        {{ email.recipient_count }}
+
+    </td>
+
+    <td>
+
+        {% if email.reply_count > 0 %}
+
+            <span class="badge bg-success">
+
+                {{ email.reply_count }} Replies
+
+            </span>
+
+        {% else %}
+
+            <span class="badge bg-warning text-dark">
+
+                No Replies
+
+            </span>
+
+        {% endif %}
+
+    </td>
+
+    <td>
+
+        {{ email.created_at|date:"d M Y" }}
+
+    </td>
+
+    <td>
+
+        <span class="badge bg-success">
+
+            Sent
+
+        </span>
+
+    </td>
+
+    <td class="text-center">
+
+        <a href="{% url 'email_detail' email.cam_id %}"
+   class="btn btn-sm btn-outline-primary">
+    View
+</a>
+
+    </td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+
+    <td colspan="6" class="text-center py-5">
+
+        <h5>No emails sent yet.</h5>
+
+        <p class="text-muted">
+
+            Go to AI Chat and send your first email.
+
+        </p>
+
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+    
+
+</div>
+
+<hr class="my-5">
+
+<div class="card shadow-sm">
+
+    <div class="card-header bg-warning">
+
+        <h4 class="mb-0">
+
+            Follow-up Inbox
+
+        </h4>
+
+    </div>
+
+    <div class="card-body p-0">
+
+        {% if followups %}
+
+        <table class="table table-hover mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th>Subject</th>
+
+                    <th>Recipients</th>
+
+                    <th>Replies</th>
+
+                    <th>Sent</th>
+
+                    <th></th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for reminder in followups %}
+
+                <tr>
+
+                    <td>
+
+                        {{ reminder.subj }}
+
+                    </td>
+
+                    <td>
+
+                        {{ reminder.recipient_count }}
+
+                    </td>
+
+                    <td>
+
+                        {{ reminder.reply_count }}
+
+                    </td>
+
+                    <td>
+
+                        {{ reminder.created_at|date:"d M Y H:i" }}
+
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{% url 'email_detail' reminder.cam_id %}"
+                            class="btn btn-outline-primary btn-sm">
+
+                            View
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+        <div class="p-4 text-center text-muted">
+
+            No follow-up reminders sent.
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

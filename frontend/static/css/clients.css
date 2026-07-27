@@ -1,0 +1,59 @@
+/* ==========================================
+   CLIENTS PAGE
+========================================== */
+
+/* Page Heading */
+
+.page-title{
+    margin-bottom: 30px;
+}
+
+/* Search Section */
+
+.search-box{
+    margin-bottom: 25px;
+}
+
+/* Table */
+
+.table{
+    vertical-align: middle;
+}
+
+.table thead th{
+    font-weight: 600;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody tr{
+    transition: 0.25s;
+}
+
+.table tbody tr:hover{
+    background: #f5f9ff;
+}
+
+/* Status Badge */
+
+.badge{
+    padding: 8px 14px;
+    border-radius: 20px;
+}
+
+/* Action Buttons */
+
+.btn-sm{
+    margin-right: 5px;
+}
+
+/* Pagination */
+
+.pagination{
+    margin-top: 25px;
+}
+
+.page-link{
+    border-radius: 8px;
+    margin: 0 3px;
+}

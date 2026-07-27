@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | PharmaComm AI</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body class="bg-light">
+
+<div class="container vh-100 d-flex justify-content-center align-items-center">
+
+    <div class="card shadow-lg p-5" style="max-width:500px;width:100%;">
+
+        <h2 class="text-center mb-4">
+            Register Employee
+        </h2>
+
+        <form id="registerForm">
+
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input
+                    class="form-control"
+                    type="text"
+                    id="name"
+                    name="name"
+                    required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input
+                    class="form-control"
+                    type="email"
+                    id="email"
+                    name="email"
+                    required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input
+                    class="form-control"
+                    type="password"
+                    id="password"
+                    name="password"
+                    required>
+            </div>
+
+            <button class="btn btn-success w-100" type="submit">
+                Register
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+document.getElementById("registerForm").addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const data = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value
+    };
+
+    const response = await fetch("/register/",{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json",
+            "X-CSRFToken":document.querySelector("[name=csrfmiddlewaretoken]").value
+        },
+
+        body:JSON.stringify(data)
+
+    });
+
+    const result = await response.json();
+
+    if(response.ok){
+
+        alert("🎉 Registration Successful!");
+
+        window.location.href="/login/";
+
+    }
+
+    else{
+
+        alert(result.message || "Registration Failed");
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

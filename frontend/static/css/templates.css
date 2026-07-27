@@ -1,0 +1,55 @@
+/* ==========================================
+   TEMPLATES
+========================================== */
+
+.template-card{
+
+    transition:.3s;
+
+    border-radius:16px;
+
+}
+
+.template-card:hover{
+
+    transform:translateY(-6px);
+
+}
+
+.template-card .card-title{
+
+    font-weight:600;
+
+}
+
+.template-card .card-text{
+
+    line-height:1.6;
+
+}
+
+.template-card .card-footer{
+
+    background:#fff;
+
+    border-top:none;
+
+}
+
+.template-card .btn{
+
+    margin-right:6px;
+
+}
+
+.search-box{
+
+    margin-bottom:25px;
+
+}
+
+.page-title{
+
+    margin-bottom:30px;
+
+}

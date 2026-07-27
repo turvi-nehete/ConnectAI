@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+AI Assistant
+{% endblock %}
+
+{% block content %}
+
+
+<div class="container mt-4">
+
+    <!-- Heading -->
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">AI Communication Assistant</h2>
+        <p class="text-muted">Describe what you want AI to do.</p>
+    </div>
+
+    <!-- Prompt Card -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+
+            <!-- ================= TARGET AUDIENCE ================= -->
+            <h5 class="mb-3">Target Audience</h5>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold" for="audienceMethod">Select Audience Method</label>
+                <select class="form-select" id="audienceMethod" name="audience_method">
+                    <option value="smart" selected>Smart Filters</option>
+                    <option value="manual">Manual Client Selection</option>
+                </select>
+            </div>
+
+            <!-- SMART FILTERS -->
+            <div class="card border-0 bg-light mb-4" id="smartFiltersSection">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Smart Filters</h6>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="customerType">Customer Category</label>
+                            <select class="form-select" id="customerType" name="customer_type">
+                                <option value="all">All</option>
+                                {% for value, label in customer_types %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="companyType">Company Type</label>
+                            <select class="form-select" id="companyType" name="company_type">
+                                <option value="all">All</option>
+                                {% for value, label in company_types %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="campaignType">Campaign Type</label>
+                            <select class="form-select" id="campaignType" name="campaign_type">
+                                <option value="email">Email</option>
+                                <option value="meeting">Meeting</option>
+                                <option value="email_meeting">Email + Meeting</option>
+                                <option value="reminder">Reminder</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <details>
+                        <summary class="fw-semibold mb-3">Advanced Audience Filters</summary>
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <label class="form-label" for="state">State</label>
+                                <select class="form-select" id="state" name="state">
+                                    <option value="all">All</option>
+                                    {% for state in states %}
+                                    <option value="{{ state }}">{{ state }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="city">City</label>
+                                <select class="form-select" id="city" name="city">
+                                    <option value="all">All</option>
+                                    {% for city in cities %}
+                                    <option value="{{ city }}">{{ city }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="country">Country</label>
+                                <select class="form-select" id="country" name="country">
+                                    {% for country in countries %}
+                                    <option value="{{ country }}">{{ country }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="status">Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="all">All</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <!-- MANUAL CLIENT SELECTION -->
+<div class="card border-0 bg-light mb-4" id="manualSelectionSection" style="display:none;">
+    <div class="card-body">
+
+        <h6 class="fw-bold">Manual Client Selection</h6>
+
+        <input
+            type="text"
+            class="form-control mb-3"
+            id="clientSearch"
+            name="client_search"
+            placeholder="Search Client...">
+
+        <div id="clientList">
+
+            {% for client in clients %}
+
+           <div class="form-check">
+    <input
+        class="form-check-input client-checkbox"
+        type="checkbox"
+        value="{{ client.cid }}"
+        data-name="{{ client.contactname }}"
+        data-company="{{ client.comp_name }}"
+        data-email="{{ client.c_mail }}"
+    >
+
+    <label class="form-check-label">
+        {{ client.comp_name }} - {{ client.contactname }}
+    </label>
+</div>
+
+            {% empty %}
+
+            <div class="text-muted">
+                No clients available.
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Audience Preview -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <h6 class="mb-1">Selected Recipients</h6>
+            <span class="text-muted">
+                <span id="recipientCountTop">0</span> recipients selected
+            </span>
+        </div>
+
+        <button class="btn btn-outline-primary btn-sm"
+                id="viewListBtnTop"
+                type="button">
+            👥 View List
+        </button>
+    </div>
+</div>
+
+
+
+            <!-- Prompt -->
+ <!-- Prompt Card -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">AI Email Generator</h5>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Generation Method -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Generation Method</label>
+
+            <div class="d-flex gap-4">
+
+                <div class="form-check">
+                    <input
+                        class="form-check-input"
+                        type="radio"
+                        name="generationMethod"
+                        id="promptOnly"
+                        value="prompt"
+                        checked>
+
+                    <label class="form-check-label" for="promptOnly">
+                        Prompt Only
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input
+                        class="form-check-input"
+                        type="radio"
+                        name="generationMethod"
+                        id="pdfPrompt"
+                        value="pdf">
+
+                    <label class="form-check-label" for="pdfPrompt">
+                        Prompt + PDF
+                    </label>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- PDF Upload -->
+        <div
+            class="card border-0 bg-light p-3 mb-4"
+            id="pdfUploadSection"
+            style="display:none;"
+        >
+
+            <label class="form-label fw-semibold mb-2">
+                📄 Upload Reference Document
+            </label>
+
+            <input
+                class="form-control"
+                type="file"
+                id="pdfFile"
+                accept=".pdf">
+
+            <small class="text-muted mt-2">
+                Upload a product brochure, campaign document, company guideline or any PDF you'd like the AI to use.
+            </small>
+
+        </div>
+
+        <!-- Prompt -->
+        <label class="form-label fw-semibold" for="promptInput">
+            Your Prompt
+        </label>
+
+        <textarea
+            class="form-control prompt-box"
+            id="promptInput"
+            name="prompt_input"
+            rows="6"
+            placeholder="Example:
+Notify Platinum customers about shipment delay and schedule a review meeting tomorrow at 3 PM."></textarea>
+
+        <!-- Generate Button -->
+        <div class="text-end mt-3">
+            <button
+                class="btn btn-primary"
+                id="generateBtn"
+                type="button">
+
+                <i class="bi bi-stars me-2"></i>
+                Generate
+
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div
+            id="loadingSection"
+            class="text-center mt-4"
+            style="display:none;">
+
+            <div class="spinner-border text-primary mb-3"></div>
+
+            <h5>AI is thinking...</h5>
+
+            <p class="text-muted">
+                Generating recipients and email draft...
+            </p>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- AI Output -->
+<div id="resultSection" style="display:none;">
+    <div class="row">
+
+        <!-- Subject -->
+        <div class="col-md-12 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">📨 Subject</h5>
+                </div>
+                <div class="card-body">
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="subjectPreview"
+                        <input
+    type="text"
+    class="form-control"
+    id="subjectPreview"
+    value=""
+    
+                        readonly>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recipients -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">👥 Recipients</h5>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-primary" id="recipientCount">42</h3>
+                    <span id="recipientLabel">Platinum Customers</span>
+                    <hr>
+                    <button class="btn btn-outline-primary btn-sm"
+                            id="viewListBtn"
+                            type="button">
+                        View List
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Email Preview</h5>
+                </div>
+                <div class="card-body">
+
+                    <textarea
+                        class="form-control"
+                        id="emailPreview"
+                        rows="14"
+                        readonly>Dear Customer,
+
+We would like to inform you that your shipment has been delayed by two days due to logistics constraints.
+
+We sincerely apologize for the inconvenience.
+
+Regards,
+IPCA Team</textarea>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="ai-heading mt-3">
+        <button class="btn btn-success me-2"
+                id="approveSendBtn"
+                type="button">
+            Approve & Send
+        </button>
+
+        <button class="btn btn-warning me-2"
+                id="editBtn"
+                type="button">
+            Edit
+        </button>
+
+        <button class="btn btn-secondary"
+                id="regenerateBtn"
+                type="button">
+            Regenerate
+        </button>
+    </div>
+</div>
+
+<!-- Recipient List Modal -->
+<div class="modal fade" id="recipientListModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Recipient List</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="recipientListItems">
+                    <!-- Populated by JS / backend -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/ai.js' %}"></script>
+
+{% endblock %}

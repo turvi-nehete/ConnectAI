@@ -1,0 +1,852 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Meetings
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- Heading -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+                Meeting Management
+            </h2>
+
+            <p class="text-muted">
+                Schedule and manage client meetings.
+            </p>
+
+        </div>
+
+        <button
+    id="newMeetingBtn"
+    class="btn btn-primary"
+    data-bs-toggle="modal"
+    data-bs-target="#scheduleMeetingModal">
+
+    + Schedule Meeting
+
+</button>
+
+    </div>
+
+    <!-- Calendar + Upcoming Meetings -->
+
+    <div class="row">
+
+        <!-- Calendar -->
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white">
+
+                    <h5 class="mb-0">
+
+                        Meeting Calendar
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div id="meetingCalendar"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+                <!-- Upcoming Meetings -->
+
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white">
+
+                    <h5 class="mb-0">
+
+                        Upcoming Meetings
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    {% for meeting in upcoming_meetings|slice:":5" %}
+
+                        <div class="meeting-card">
+
+                            <h6>{{ meeting.title }}</h6>
+
+                            <small class="text-muted">
+
+                                {{ meeting.meeting_date }} • {{ meeting.meeting_time }}
+
+                            </small>
+
+                        </div>
+
+                        {% if not forloop.last %}
+                            <hr>
+                        {% endif %}
+
+                    {% empty %}
+
+                        <p class="text-muted">
+
+                            No upcoming meetings.
+
+                        </p>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Meeting Details -->
+
+    <div class="card shadow-sm border-0 mt-5">
+
+        <div class="card-header bg-white">
+
+            <h5 class="mb-0">
+
+                Meeting Details
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-hover">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Meeting</th>
+
+                        <th>Date</th>
+
+                        <th>Time</th>
+
+                        <th>Participants</th>
+
+                        <th>Status</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for meeting in meetings %}
+
+                    <tr>
+
+                        <td>{{ meeting.title }}</td>
+
+                        <td>{{ meeting.meeting_date }}</td>
+
+                        <td>{{ meeting.meeting_time }}</td>
+
+                        <td>{{ meeting.participants.count }}</td>
+
+                        <td>
+
+                            <span class="badge bg-success">
+
+                                Scheduled
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+    <button
+        type="button"
+        class="btn btn-sm btn-outline-secondary editMeetingBtn me-1"
+        data-id="{{ meeting.mid }}"
+        data-title="{{ meeting.title }}"
+        data-agenda="{{ meeting.agenda }}"
+        data-date="{{ meeting.meeting_date|date:'Y-m-d' }}"
+        data-time="{{ meeting.meeting_time|time:'H:i' }}"
+        data-duration="{{ meeting.duration_minutes }}"
+        data-participants="{% for p in meeting.participants.all %}{{ p.client.cid }}{% if not forloop.last %},{% endif %}{% endfor %}">
+
+        Edit
+
+    </button>
+
+    <button
+        type="button"
+        class="btn btn-sm btn-success joinMeetBtn"
+        data-link="{{ meeting.google_meet_link }}"
+        {% if not meeting.google_meet_link %}disabled{% endif %}>
+
+        Join Meet
+
+    </button>
+
+</td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6" class="text-center text-muted">
+
+                            No meetings scheduled.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ===========================
+Schedule Meeting Modal
+============================ -->
+
+<div class="modal fade"
+     id="scheduleMeetingModal"
+     tabindex="-1"
+     aria-labelledby="scheduleMeetingModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title"
+                    id="scheduleMeetingModalLabel">
+
+                    Schedule Meeting
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <form id="meetingForm">
+
+                    <!-- Title -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Meeting Title
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="meetingTitle"
+                            required>
+
+                    </div>
+
+                    <!-- Agenda -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Agenda
+
+                        </label>
+
+                        <textarea
+                            class="form-control"
+                            id="meetingAgenda"
+                            rows="3">
+                        </textarea>
+
+                    </div>
+
+                    <div class="row">
+
+                        <!-- Date -->
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+
+                                Date
+
+                            </label>
+
+                            <input
+                                type="date"
+                                class="form-control"
+                                id="meetingDate"
+                                required>
+
+                        </div>
+
+                        <!-- Time -->
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+
+                                Time
+
+                            </label>
+
+                            <input
+                                type="time"
+                                class="form-control"
+                                id="meetingTime"
+                                required>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Duration -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Duration (minutes)
+
+                        </label>
+
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="meetingDuration"
+                            value="30"
+                            min="15">
+
+                    </div>
+                    <!-- Clients -->
+
+<div class="mb-3">
+
+    <label class="form-label">
+
+        Select Clients
+
+    </label>
+
+    <select
+    class="form-select"
+    id="meetingClients"
+    multiple
+    size="6">
+
+    {% for client in clients %}
+
+        <option value="{{ client.cid }}">
+
+            {{ client.comp_name }} ({{ client.contactname }})
+
+        </option>
+
+    {% empty %}
+
+        <option disabled>
+
+            No clients found
+
+        </option>
+
+    {% endfor %}
+
+</select>
+
+    <div class="form-text">
+        Hold Ctrl (Windows) or Cmd (Mac) to select multiple clients.
+    </div>
+
+</div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button
+    type="button"
+    class="btn btn-primary"
+    id="scheduleMeetingBtn">
+
+    Schedule Meeting
+
+</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- View Meeting Modal -->
+<div class="modal fade" id="viewMeetingModal" tabindex="-1">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Meeting Details
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <h4 id="viewTitle"></h4>
+
+                <p>
+                    <strong>Agenda:</strong><br>
+                    <span id="viewAgenda"></span>
+                </p>
+
+                <p>
+                    <strong>Date:</strong>
+                    <span id="viewDate"></span>
+                </p>
+
+                <p>
+                    <strong>Time:</strong>
+                    <span id="viewTime"></span>
+                </p>
+
+                <p>
+                    <strong>Duration:</strong>
+                    <span id="viewDuration"></span> mins
+                </p>
+
+                <hr>
+
+                <h6>
+                    Participants
+                </h6>
+
+                <ul
+                    id="viewParticipants"
+                    class="list-group">
+                </ul>
+
+                <hr>
+
+                
+                    id="viewMeetLink"
+                    target="_blank"
+                    class="btn btn-success">
+
+                    Join Google Meet
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function getCookie(name) {
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+
+// ===========================
+// Meeting Form Mode (Create / Edit)
+// ===========================
+
+let editingMeetingId = null;
+let calendarInstance = null;
+
+function resetMeetingForm() {
+
+    editingMeetingId = null;
+
+    document.getElementById("meetingTitle").value = "";
+    document.getElementById("meetingAgenda").value = "";
+    document.getElementById("meetingDate").value = "";
+    document.getElementById("meetingTime").value = "";
+    document.getElementById("meetingDuration").value = "30";
+
+    Array.from(document.getElementById("meetingClients").options).forEach(function (option) {
+        option.selected = false;
+    });
+
+    document.getElementById("scheduleMeetingModalLabel").textContent = "Schedule Meeting";
+    document.getElementById("scheduleMeetingBtn").textContent = "Schedule Meeting";
+
+}
+
+document.getElementById("newMeetingBtn").addEventListener("click", function () {
+    resetMeetingForm();
+});
+
+// ===========================
+// Update Meeting (local state now, API-ready for later)
+// ===========================
+
+async function updateMeetingRequest(meetingId, data) {
+
+    const response = await fetch(`/calendar/update/${meetingId}/`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.message || "Failed to update meeting.");
+    }
+
+    return result;
+}
+
+function applyMeetingUpdateToUI(meetingId, data, selectedClients) {
+
+    const editBtn = document.querySelector(
+        '.editMeetingBtn[data-id="' + meetingId + '"]'
+    );
+
+    if (!editBtn) return;
+
+    const row = editBtn.closest("tr");
+
+    if (row) {
+
+        const cells = row.querySelectorAll("td");
+
+        if (cells[0]) cells[0].textContent = data.title;
+        if (cells[1]) cells[1].textContent = data.meeting_date;
+        if (cells[2]) cells[2].textContent = data.meeting_time;
+        if (cells[3]) cells[3].textContent = selectedClients.length;
+
+    }
+
+    // Keep the button's own dataset in sync so re-opening Edit shows the latest values
+    editBtn.dataset.title = data.title;
+    editBtn.dataset.agenda = data.agenda;
+    editBtn.dataset.date = data.meeting_date;
+    editBtn.dataset.time = data.meeting_time;
+    editBtn.dataset.duration = data.duration_minutes;
+    editBtn.dataset.participants = selectedClients.join(",");
+
+    // Reflect the change on the calendar immediately, if the event is present
+    if (calendarInstance) {
+
+        const event = calendarInstance.getEventById(String(meetingId));
+
+        if (event) {
+
+            event.setProp("title", data.title);
+
+            if (data.meeting_date && data.meeting_time) {
+                event.setStart(data.meeting_date + "T" + data.meeting_time);
+            }
+
+        }
+
+    }
+
+}
+
+document.getElementById("scheduleMeetingBtn").addEventListener("click", async function () {
+
+    const selectedClients = Array.from(
+        document.getElementById("meetingClients").selectedOptions
+    ).map(option => Number(option.value));
+
+    const data = {
+        title: document.getElementById("meetingTitle").value,
+        agenda: document.getElementById("meetingAgenda").value,
+        meeting_date: document.getElementById("meetingDate").value,
+        meeting_time: document.getElementById("meetingTime").value,
+        duration_minutes: Number(document.getElementById("meetingDuration").value),
+        client_ids: selectedClients
+    };
+
+    if (editingMeetingId) {
+
+        const result = await updateMeetingRequest(editingMeetingId, data);
+
+        if (result) {
+
+            applyMeetingUpdateToUI(editingMeetingId, data, selectedClients);
+
+            const modalEl = document.getElementById("scheduleMeetingModal");
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            resetMeetingForm();
+
+        } else {
+
+            alert("Could not update the meeting. Please try again.");
+
+        }
+
+        return;
+
+    }
+
+    const response = await fetch("/calendar/create/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    console.log(result);
+    alert(JSON.stringify(result, null, 2));
+
+});
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const calendarEl = document.getElementById("meetingCalendar");
+
+    calendarInstance = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        height: 650,
+        events: "/calendar/events/",
+    });
+
+    calendarInstance.render();
+
+});
+
+
+// ===========================
+// View Meeting Details
+// ===========================
+
+document.addEventListener("click", async function (event) {
+
+    const btn = event.target.closest(".viewMeetingBtn");
+
+    if (!btn) return;
+
+    const meetingId = btn.dataset.id;
+
+    try {
+
+        const response = await fetch(`/calendar/meeting/${meetingId}/`);
+
+        if (!response.ok) {
+            throw new Error("Request failed with status " + response.status);
+        }
+
+        const data = await response.json();
+
+        document.getElementById("viewTitle").textContent = data.title || "";
+        document.getElementById("viewAgenda").textContent = data.agenda || "";
+        document.getElementById("viewDate").textContent = data.meeting_date || "";
+        document.getElementById("viewTime").textContent = data.meeting_time || "";
+        document.getElementById("viewDuration").textContent = data.duration_minutes || "";
+
+        const participantsList = document.getElementById("viewParticipants");
+        participantsList.innerHTML = "";
+
+        if (data.participants && data.participants.length) {
+
+            data.participants.forEach(function (p) {
+
+                const li = document.createElement("li");
+                li.className = "list-group-item";
+
+                li.innerHTML =
+                    "<strong>" + (p.company || "") + "</strong><br>" +
+                    "<small class=\"text-muted\">" + (p.contact || "") + " | " + (p.email || "") + "</small>";
+
+                participantsList.appendChild(li);
+
+            });
+
+        } else {
+
+            const li = document.createElement("li");
+            li.className = "list-group-item text-muted";
+            li.textContent = "No participants.";
+            participantsList.appendChild(li);
+
+        }
+
+        const meetLinkBtn = document.getElementById("viewMeetLink");
+
+        if (data.google_meet_link) {
+            meetLinkBtn.href = data.google_meet_link;
+            meetLinkBtn.style.display = "inline-block";
+        } else {
+            meetLinkBtn.removeAttribute("href");
+            meetLinkBtn.style.display = "none";
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById("viewMeetingModal"));
+        modal.show();
+
+    } catch (error) {
+
+        console.error("Error fetching meeting details:", error);
+        alert("Could not load meeting details. Please try again.");
+
+    }
+
+});
+
+// ===========================
+// Edit Meeting (opens Schedule modal pre-filled)
+// ===========================
+
+document.addEventListener("click", function (event) {
+
+    const btn = event.target.closest(".editMeetingBtn");
+
+    if (!btn) return;
+
+    editingMeetingId = btn.dataset.id;
+
+    document.getElementById("meetingTitle").value = btn.dataset.title || "";
+    document.getElementById("meetingAgenda").value = btn.dataset.agenda || "";
+    document.getElementById("meetingDate").value = btn.dataset.date || "";
+    document.getElementById("meetingTime").value = btn.dataset.time || "";
+    document.getElementById("meetingDuration").value = btn.dataset.duration || "30";
+
+    const participantIds = (btn.dataset.participants || "")
+        .split(",")
+        .filter(Boolean)
+        .map(Number);
+
+    Array.from(document.getElementById("meetingClients").options).forEach(function (option) {
+        option.selected = participantIds.includes(Number(option.value));
+    });
+
+    document.getElementById("scheduleMeetingModalLabel").textContent = "Edit Meeting";
+    document.getElementById("scheduleMeetingBtn").textContent = "Save Changes";
+
+    const modal = new bootstrap.Modal(document.getElementById("scheduleMeetingModal"));
+    modal.show();
+
+});
+
+// ===========================
+// Join Meet
+// ===========================
+
+document.addEventListener("click", function (event) {
+
+    const btn = event.target.closest(".joinMeetBtn");
+
+    if (!btn) return;
+
+    const link = btn.dataset.link;
+
+    if (!link) {
+        alert("No Google Meet link is available for this meeting yet.");
+        return;
+    }
+
+    window.open(link, "_blank");
+
+});
+
+</script>
+
+
+
+{% endblock %}

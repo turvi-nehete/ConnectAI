@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+
+<!-- Welcome Section --> 
+<div class="dashboard-header">
+    <h2 id="greeting" data-username=" {{ request.user.get_full_name }}"></h2>
+    <p class="text-muted">
+        Welcome back to PharmaComm AI. Here's a quick overview of today's activity.
+    </p>
+</div>
+
+<!-- Statistics -->
+<div class="row g-4">
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-center p-3 stats-card">
+            <h6 class="text-muted">Total Clients</h6>
+            <h2>{{ total_clients }}</h2>
+            <small class="text-success">Active Clients</small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-center p-3 stats-card">
+            <h6 class="text-muted">Upcoming Meetings</h6>
+            <h2>{{ upcoming_meetings }}</h2>
+            <small class="text-success">Scheduled</small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-center p-3 stats-card">
+            <h6 class="text-muted">Campaigns</h6>
+            <h2>{{ total_campaigns }}</h2>
+            <small class="text-success">Created</small>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+    <div class="card shadow-sm border-0 text-center p-3 stats-card">
+        <h6 class="text-muted">Platinum Clients</h6>
+        <h2>{{ platinum_clients }}</h2>
+        <small class="text-success">High Priority Customers</small>
+    </div>
+</div>
+
+</div>
+
+<!-- Calendar + Upcoming Meetings -->
+<div class="row mt-5">
+
+    <!-- Calendar -->
+    <div class="col-lg-7">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Calendar</h5>
+            </div>
+
+            <div class="card-body">
+
+                <div id="calendar"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Upcoming Meetings -->
+    <div class="col-lg-5">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Upcoming Meetings</h5>
+            </div>
+
+            <div class="card-body">
+
+                {% for meeting in recent_meetings %}
+
+                    <div class="meeting-item">
+
+                        <h6>{{ meeting.title }}</h6>
+
+                        <small class="text-muted">
+
+                            {{ meeting.meeting_date }} |
+                            {{ meeting.meeting_time }}
+
+                        </small>
+
+                        {% if meeting.agenda %}
+                            <p class="mb-0 mt-2 text-secondary">
+                                {{ meeting.agenda|truncatechars:80 }}
+                            </p>
+                        {% endif %}
+
+                    </div>
+
+                    {% if not forloop.last %}
+                        <hr>
+                    {% endif %}
+
+                {% empty %}
+
+                    <p class="text-muted mb-0">
+                        No upcoming meetings scheduled.
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Recent Activity + AI Insight -->
+<div class="row mt-5">
+
+    <!-- Recent Campaigns -->
+    <div class="col-lg-7">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Recent Campaigns</h5>
+            </div>
+
+            <div class="card-body">
+
+                {% for campaign in recent_campaigns %}
+
+                    <div class="mb-3">
+
+                        <h6 class="mb-1">
+                            {{ campaign.cap_name }}
+                        </h6>
+
+                        
+
+                        <small class="text-muted">
+
+                            Subject:
+                            {{ campaign.subj }}
+
+                        </small>
+
+                        <!-- <span class="badge bg-primary mt-2">
+                            {{ campaign.status|title }}
+                        </span> -->
+                    
+
+                    </div>
+
+                    {% if not forloop.last %}
+                        <hr>
+                    {% endif %}
+
+                {% empty %}
+
+                    <p class="text-muted mb-0">
+                        No campaigns created yet.
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- AI Insight -->
+    <div class="col-lg-5">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-header bg-white">
+                <h5 class="mb-0">System Summary</h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="alert alert-info mb-0">
+
+                    <strong>Workspace Overview</strong>
+
+                    <hr>
+
+                    <p class="mb-2">
+                        👥 <strong>{{ total_clients }}</strong> Active Clients
+                    </p>
+
+                    <p class="mb-2">
+                        📅 <strong>{{ upcoming_meetings }}</strong> Upcoming Meetings
+                    </p>
+
+                    <p class="mb-2">
+                        📢 <strong>{{ total_campaigns }}</strong> Campaigns Created
+                    </p>
+
+                    <p class="mb-0">
+                        📝 <strong>{{ draft_campaigns }}</strong> Draft Campaigns Awaiting Approval
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Quick Actions -->
+<div class="mt-5 quick-actions">
+
+    <h4 class="mb-3">
+        Quick Actions
+    </h4>
+
+    <div class="d-flex gap-3 flex-wrap">
+
+        <a href="{% url 'ai_chat' %}" class="btn quick-action-btn">
+            Generate Email
+        </a>
+
+        <a href="{% url 'meetings' %}" class="btn quick-action-btn">
+            Schedule Meeting
+        </a>
+
+        <!-- <a href="{% url 'campaigns' %}" class="btn quick-action-btn">
+            Create Campaign
+        </a> -->
+
+    </div>
+
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const calendarEl = document.getElementById("calendar");
+
+    if (!calendarEl) return;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+
+        initialView: "dayGridMonth",
+
+        height: 500,
+
+        events: "/calendar/events/",
+
+        headerToolbar: {
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,listWeek"
+        },
+
+        eventTimeFormat: {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+        },
+
+        eventClick: function(info) {
+            info.jsEvent.preventDefault();
+
+            if (info.event.url) {
+                window.location.href = "{% url 'meetings' %}";
+            }
+        }
+
+    });
+
+    calendar.render();
+
+});
+</script>
+
+{% endblock %}

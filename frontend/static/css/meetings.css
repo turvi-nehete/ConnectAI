@@ -1,0 +1,59 @@
+/* ==========================================
+   MEETINGS
+========================================== */
+
+#meetingCalendar{
+
+    min-height:600px;
+
+}
+
+.meeting-card{
+
+    margin-bottom:20px;
+
+}
+
+.meeting-card h6{
+
+    margin-bottom:4px;
+
+}
+
+.table{
+
+    vertical-align:middle;
+
+}
+
+.table thead th{
+
+    font-weight:600;
+
+}
+
+.table tbody tr{
+
+    transition:.2s;
+
+}
+
+.table tbody tr:hover{
+
+    background:#f8fbff;
+
+}
+
+.badge{
+
+    border-radius:20px;
+
+    padding:8px 14px;
+
+}
+
+.page-link{
+
+    border-radius:8px;
+
+}

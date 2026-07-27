@@ -1,0 +1,80 @@
+/* ==========================================
+   FULLCALENDAR
+========================================== */
+
+/* Toolbar Buttons */
+
+.fc .fc-button{
+
+    background:#558467 !important;
+
+    border:none !important;
+
+}
+
+.fc .fc-button:hover{
+
+    background:#558467 !important;
+
+}
+
+.fc .fc-button:focus{
+
+    box-shadow:none !important;
+
+}
+
+/* Today's Date */
+
+.fc-day-today{
+    background:#f5f5f5 !important;
+}
+
+/* Events */
+
+.fc-event{
+
+    background:#558467 !important;
+
+    border:none !important;
+
+    border-radius:6px !important;
+
+    padding:2px 4px;
+
+    cursor:pointer;
+
+}
+
+/* Calendar Border */
+
+.fc-theme-standard td,
+.fc-theme-standard th{
+
+    border:1px solid #e9ecef;
+
+}
+
+.fc{
+
+    font-family:"Segoe UI",sans-serif;
+
+}
+.fc-daygrid-day-number{
+    color:#000 !important;
+    font-weight:600;
+}
+.fc-toolbar-title{
+    color:#000 !important;
+    font-weight:700;
+}
+.fc-col-header-cell-cushion{
+    color:#000 !important;
+    font-weight:600;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-scrollgrid{
+    border:1px solid #B0BA99 !important;
+}
