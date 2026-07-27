@@ -91,31 +91,26 @@
                 </a>
             </div>
 
+            <!-- Login Button -->
             <button class="btn btn-primary w-100 mb-3" type="submit">
                 Login
             </button>
 
+            <!-- Register Button -->
+            <a href="{% url 'register' %}" class="btn btn-outline-primary w-100">
+                Create New Account
+            </a>
+
         </form>
-
-        <div class="text-center my-3 text-muted">
-            OR
-        </div>
-
-        <div class="d-grid gap-2">
-
-            <button class="btn btn-outline-danger" type="button">
-                <i class="bi bi-google"></i>
-                Continue with Google
-            </button>
-
-            
-
-        </div>
 
         <hr>
 
-        <p class="text-center text-muted mb-0">
+        <p class="text-center text-muted mb-2">
             Authorized employees only
+        </p>
+
+        <p class="text-center text-muted small mb-0">
+            © 2026 PharmaComm AI. Internal Enterprise Portal.
         </p>
 
     </div>
