@@ -26,37 +26,38 @@ SCOPES = ["https://www.googleapis.com/auth/calendar"]
 # -----------------------------
 # Authenticate
 # -----------------------------
-creds = None
+def get_calendar_service():
+    creds = None
 
-if os.path.exists(TOKEN_PATH):
-    creds = Credentials.from_authorized_user_file(
-        TOKEN_PATH,
-        SCOPES
-    )
-
-if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-    else:
-        flow = InstalledAppFlow.from_client_secrets_file(
-            CREDENTIALS_PATH,
+    if os.path.exists(TOKEN_PATH):
+        creds = Credentials.from_authorized_user_file(
+            TOKEN_PATH,
             SCOPES
         )
-        creds = flow.run_local_server(port=0)
 
-    with open(TOKEN_PATH, "w") as token:
-        token.write(creds.to_json())
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            if not os.path.exists(CREDENTIALS_PATH):
+                raise FileNotFoundError(
+                    f"Missing Google credentials file: {CREDENTIALS_PATH}"
+                )
 
+            flow = InstalledAppFlow.from_client_secrets_file(
+                CREDENTIALS_PATH,
+                SCOPES
+            )
+            creds = flow.run_local_server(port=0)
 
-# -----------------------------
-# Google Calendar Service
-# -----------------------------
-service = build(
-    "calendar",
-    "v3",
-    credentials=creds
-)
+        with open(TOKEN_PATH, "w") as token:
+            token.write(creds.to_json())
 
+    return build(
+        "calendar",
+        "v3",
+        credentials=creds
+    )
 
 # -----------------------------
 # Create Meeting
@@ -81,7 +82,8 @@ def create_meeting(
     Returns:
         dict
     """
-
+    service = get_calendar_service()
+    
     if attendees is None:
         attendees = []
 
@@ -169,6 +171,7 @@ def update_google_meeting(
         dict
     """
 
+    service = get_calendar_service()
     if attendees is None:
         attendees = []
 
