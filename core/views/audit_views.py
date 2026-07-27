@@ -8,7 +8,10 @@ from core.models import AuditLog
 
 def audit(request):
 
-    logs = AuditLog.objects.select_related("uid").order_by("-timestamp")
+    # Show only the logged-in user's audit logs
+    logs = AuditLog.objects.select_related("uid").filter(
+        uid=request.user
+    ).order_by("-timestamp")
 
     # Search
     search = request.GET.get("search", "").strip()
@@ -25,18 +28,23 @@ def audit(request):
     if tool != "All":
         logs = logs.filter(tool_used=tool)
 
-    # Summary Cards
-    total_logs = AuditLog.objects.count()
+    # Summary Cards (only current user's logs)
+    total_logs = AuditLog.objects.filter(
+        uid=request.user
+    ).count()
 
     successful = AuditLog.objects.filter(
+        uid=request.user,
         success=True
     ).count()
 
     failed = AuditLog.objects.filter(
+        uid=request.user,
         success=False
     ).count()
 
     today = AuditLog.objects.filter(
+        uid=request.user,
         timestamp__date=timezone.localdate()
     ).count()
 
@@ -44,6 +52,14 @@ def audit(request):
     paginator = Paginator(logs, 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+
+    available_tools = (
+    AuditLog.objects
+    .filter(uid=request.user)
+    .values_list("tool_used", flat=True)
+    .distinct()
+    .order_by("tool_used")
+)
 
     context = {
         "page_obj": page_obj,
@@ -53,6 +69,7 @@ def audit(request):
         "today": today,
         "search": search,
         "selected_tool": tool,
+        "available_tools": available_tools,
     }
 
     return render(request, "audit.html", context)

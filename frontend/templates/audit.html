@@ -53,30 +53,27 @@ Audit Logs
 
     </div>
 
-    
 <!-- Search + Filter -->
 
 <div class="card shadow-sm border-0 mb-4">
-
     <div class="card-body">
 
         <form method="GET">
 
-            <div class="row">
+            <div class="row g-2 align-items-center">
 
-                <div class="col-md-8">
-
+                <!-- Search -->
+                <div class="col-md-6">
                     <input
                         type="text"
                         name="search"
                         class="form-control"
                         placeholder="Search Prompt, User or Tool..."
                         value="{{ search }}">
-
                 </div>
 
-                <div class="col-md-4">
-
+                <!-- Tool Filter -->
+                <div class="col-md-6">
                     <select
                         name="tool"
                         class="form-select"
@@ -87,43 +84,29 @@ Audit Logs
                             All Tools
                         </option>
 
-                        <option value="LLM"
-                            {% if selected_tool == "LLM" %}selected{% endif %}>
-                            LLM
-                        </option>
-
-                        <option value="SQL Tool"
-                            {% if selected_tool == "SQL Tool" %}selected{% endif %}>
-                            SQL Tool
-                        </option>
-
-                        <option value="Gmail API"
-                            {% if selected_tool == "Gmail API" %}selected{% endif %}>
-                            Gmail API
-                        </option>
-
-                        <option value="Google Calendar"
-                            {% if selected_tool == "Google Calendar" %}selected{% endif %}>
-                            Google Calendar
-                        </option>
-
-                        <option value="Tavily Search"
-                            {% if selected_tool == "Tavily Search" %}selected{% endif %}>
-                            Tavily Search
-                        </option>
+                        {% for tool in available_tools %}
+                            <option value="{{ tool }}"
+                                {% if selected_tool == tool %}selected{% endif %}>
+                                {{ tool }}
+                            </option>
+                        {% endfor %}
 
                     </select>
-
                 </div>
+
+                <!-- Go Button -->
+                <!-- <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        Go
+                    </button>
+                </div> -->
 
             </div>
 
         </form>
 
     </div>
-
 </div>
-
     <!-- Audit Table -->
 
     <div class="card shadow-sm border-0">
