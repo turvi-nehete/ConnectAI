@@ -41,7 +41,6 @@ def register_view(request):
 
     return render(request, "register.html")
 
-
 def login_view(request):
 
     if request.method == "POST":
@@ -51,6 +50,35 @@ def login_view(request):
 
         print(email)
         print(password)
+
+        # ==========================
+        # ORIGINAL CODE (COMMENTED)
+        # ==========================
+
+        # try:
+        #     user_obj = User.objects.get(email=email)
+        #     print("Username:", user_obj.username)
+        #
+        #     user = authenticate(
+        #         request,
+        #         username=user_obj.username,
+        #         password=password
+        #     )
+        #
+        #     print("Authenticated User:", user)
+        #
+        # except User.DoesNotExist:
+        #     print("User not found")
+        #     user = None
+        #
+        # if user is not None:
+        #     print("LOGIN SUCCESS")
+        #     login(request, user)
+        #     return redirect("dashboard")
+
+        # ==========================
+        # DEBUG VERSION
+        # ==========================
 
         try:
             user_obj = User.objects.get(email=email)
@@ -64,17 +92,19 @@ def login_view(request):
 
             print("Authenticated User:", user)
 
-        except User.DoesNotExist:
-            print("User not found")
-            user = None
+            if user is not None:
+                print("LOGIN SUCCESS")
+                login(request, user)
+                return redirect("dashboard")
 
-        if user is not None:
-            print("LOGIN SUCCESS")
-            login(request, user)
-            return redirect("dashboard")
+            print("LOGIN FAILED")
+            messages.error(request, "Invalid email or password.")
 
-        print("LOGIN FAILED")
-        messages.error(request, "Invalid email or password.")
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print("ERROR:", repr(e))
+            raise
 
     return render(request, "login.html")
 
