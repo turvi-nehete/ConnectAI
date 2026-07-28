@@ -43,10 +43,21 @@ Dashboard
 
     <div class="col-md-3">
     <div class="card shadow-sm border-0 text-center p-3 stats-card">
-        <h6 class="text-muted">Platinum Clients</h6>
-        <h2>{{ platinum_clients }}</h2>
-        <small class="text-success">High Priority Customers</small>
+
+        <h6 class="text-muted">
+            Reply Rate
+        </h6>
+
+        <h2>
+            {{ reply_rate }}%
+        </h2>
+
+        <small class="text-success">
+            {{ replied_recipients }} of {{ total_recipients }} recipients replied
+        </small>
+
     </div>
+</div>
 </div>
 
 </div>

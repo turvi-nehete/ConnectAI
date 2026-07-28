@@ -2,7 +2,12 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
-from core.models import Client, Campaign, Meeting
+from core.models import (
+    Client,
+    Campaign,
+    Meeting,
+    CampaignRecipient,
+)
 
 
 @login_required
@@ -36,16 +41,25 @@ def dashboard(request):
         .filter(created_by=request.user)
         .order_by("-created_at")[:5]
     )
-    draft_campaigns = Campaign.objects.filter(
-    created_by=request.user,
-    status="draft"
+
+    campaign_recipients = CampaignRecipient.objects.filter(
+    cam_id__created_by=request.user
+)
+
+    total_recipients = campaign_recipients.count()
+
+    replied_recipients = campaign_recipients.filter(
+      replied=True
     ).count()
 
-    platinum_clients = Client.objects.filter(
-    uid=request.user,
-    customer_type="platinum",
-    is_active=True
-    ).count()
+    if total_recipients > 0:
+      reply_rate = round(
+        (replied_recipients / total_recipients) * 100,
+        1
+    )
+    else:
+      reply_rate = 0
+    
 
     return render(
         request,
@@ -56,7 +70,8 @@ def dashboard(request):
             "upcoming_meetings": upcoming_meetings,
             "recent_meetings": recent_meetings,
             "recent_campaigns": recent_campaigns,
-            "draft_campaigns": draft_campaigns,
-            "platinum_clients": platinum_clients,
+            "reply_rate": reply_rate,
+    "replied_recipients": replied_recipients,
+    "total_recipients": total_recipients,
         },
     )
